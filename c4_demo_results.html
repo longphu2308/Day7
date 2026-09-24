@@ -214,61 +214,64 @@
             </div>
         </div>
 
-        <!-- Slide 2: The Paradox -->
+        <!-- Slide 2: The Results -->
         <div class="slide">
             <div class="slide-header">
                 <h2 class="slide-subtitle">02 / Kết quả tổng quan</h2>
-                <h1 class="slide-title">Sự bất ngờ của "Recall"</h1>
+                <h1 class="slide-title">Sức mạnh của Temporal Deduplication</h1>
             </div>
             <div class="glass-card">
                 <table class="data-table">
                     <tr>
                         <th>Phương pháp</th>
-                        <th>Rare-Case Recall</th>
+                        <th>Event Recall</th>
                         <th>Coverage</th>
-                        <th>Redundancy (Similarity)</th>
+                        <th>Redundancy (Waste)</th>
                     </tr>
                     <tr>
                         <td>Random Sampling</td>
-                        <td>4.0%</td>
-                        <td>5/6</td>
-                        <td>0.000</td>
+                        <td>32.0%</td>
+                        <td>4/6</td>
+                        <td class="success-text">0.006 (Thấp)</td>
                     </tr>
                     <tr>
                         <td>Uncertainty-only</td>
+                        <td class="warning">76.0%</td>
+                        <td class="success-text">6/6</td>
+                        <td class="warning">0.452 (Lãng phí 45%)</td>
+                    </tr>
+                    <tr>
+                        <td>Diversity-only (CLIP Novelty)</td>
                         <td class="success-text">100.0%</td>
                         <td class="success-text">6/6</td>
-                        <td class="danger-text">0.016 (High)</td>
+                        <td class="danger-text">0.726 (Lãng phí 72%)</td>
                     </tr>
                     <tr>
                         <td><strong>Ours (Ambulance Chaser)</strong></td>
-                        <td class="warning">4.0%</td>
-                        <td>4/6</td>
-                        <td class="success-text">0.000 (Low)</td>
+                        <td class="success-text">100.0%</td>
+                        <td class="success-text">6/6</td>
+                        <td class="success-text">0.176 (Tối ưu)</td>
                     </tr>
                 </table>
             </div>
             <div class="grid-2">
                 <div class="glass-card">
-                    <h3 style="color: var(--danger); margin-bottom: 1rem;">Tại sao Recall lại rớt xuống 4%? Thất bại ư?</h3>
+                    <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Vấn đề của các Baselines</h3>
                     <p style="line-height: 1.8; color: var(--text-secondary); font-size: 1.1rem;">
-                        <strong>KHÔNG! Đây chính là thành công lớn nhất của thuật toán.</strong><br><br>
-                        Trong data giả lập, 50 ảnh "đám ma" diễn ra <strong>liên tiếp nhau</strong>. Phương pháp <em>Uncertainty-only</em> gom sạch 50 ảnh y hệt nhau này (đạt 100% recall nhưng trùng lặp cao).<br><br>
-                        <strong>Ambulance Chaser</strong> có <em>Temporal Filter (stride = 30)</em>. Khi nó chọn 1 ảnh đám ma, nó sẽ <strong>bỏ qua 30 ảnh tiếp theo</strong> để tiết kiệm budget cho cảnh khác. Kết quả: Nó chỉ nhặt đúng 10 ảnh độc nhất từ 300 rare frames, đưa redundancy về 0 hoàn hảo.
+                        <strong>Diversity-only</strong> tìm được hết các sự kiện hiếm, nhưng nó lại chọn liên tiếp 15-20 frames của <em>cùng một sự kiện</em>. Kết quả là nó lãng phí tới <strong>72% budget</strong> vào các frame trùng lặp, không còn chỗ trống cho các sự kiện khác nếu data lớn hơn.<br><br>
+                        <strong>Uncertainty-only</strong> bị lừa bởi các "unknown unknowns" (model tự tin là cảnh thường nhưng thực chất là cảnh hiếm), dẫn đến bỏ sót sự kiện (chỉ đạt 76%).
                     </p>
                 </div>
                 <div class="glass-card">
-                    <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Minh chứng (Ablation Study)</h3>
+                    <h3 style="color: var(--success); margin-bottom: 1rem;">Giải pháp: Ambulance Chaser</h3>
                     <p style="line-height: 1.8; color: var(--text-secondary); font-size: 1.1rem;">
-                        Nếu chúng ta <strong>tắt tính năng Temporal Filter</strong> (chỉ dựa vào điểm số thuần):
+                        Bằng cách kết hợp <strong>Novelty (để tìm dị thường)</strong>, <strong>Uncertainty (để tìm ca khó)</strong>, và <strong>Temporal Filter (để chống trùng lặp)</strong>, thuật toán của chúng ta:<br><br>
                     </p>
-                    <ul style="line-height: 2; margin-top: 1rem; color: var(--success); font-size: 1.2rem;">
-                        <li>Recall của Ours nhảy vọt lên: <strong>30.7%</strong></li>
-                        <li>Random baseline: <strong>5.0%</strong></li>
+                    <ul style="line-height: 2; margin-top: 1rem; color: var(--success); font-size: 1.2rem; margin-left: 1.5rem;">
+                        <li>Đạt Recall tuyệt đối <strong>100%</strong>.</li>
+                        <li>Ép mức độ lãng phí (redundancy) xuống chỉ còn <strong>17%</strong>.</li>
+                        <li>Dành phần budget dư ra để khám phá thêm các long-tail cases khác.</li>
                     </ul>
-                    <p style="margin-top: 1rem; color: var(--text-secondary);">
-                        → Chứng minh rằng điểm số của model cực kỳ tốt (Uplift >6x so với random), và bộ lọc thời gian hoạt động chính xác để chống trùng lặp.
-                    </p>
                 </div>
             </div>
         </div>
@@ -276,18 +279,21 @@
         <!-- Slide 3: Visualizing the Space -->
         <div class="slide">
             <div class="slide-header">
-                <h2 class="slide-subtitle">03 / Không gian Embedding</h2>
-                <h1 class="slide-title">t-SNE Visualization</h1>
+                <h2 class="slide-subtitle">03 / Score Distributions</h2>
+                <h1 class="slide-title">Tại sao cần Compound Score?</h1>
             </div>
             <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; height: 100%;">
                 <p style="color: var(--text-secondary); margin-bottom: 1rem; font-size: 1.1rem;">
-                    Bản đồ 2D của 5000 frames đầu tiên. Các đốm màu (Cam, Đỏ, Xanh) là các nhóm Rare Scenarios.
+                    Sự phân bố điểm số giữa frames Bình thường (Xám) và Hiếm (Xanh lá).
                 </p>
-                <div class="image-container" style="flex: 1; width: 100%;">
-                    <img src="./demo/outputs/02_tsne.png" alt="t-SNE Plot">
+                <div class="image-container" style="flex: 1; width: 100%; background: var(--bg-primary);">
+                    <img src="./demo/outputs/06_distributions.png" alt="Score Distributions" style="filter: brightness(1.1);">
                 </div>
-                <p style="color: var(--accent-primary); margin-top: 1rem; font-size: 1.1rem;">
-                    <strong>Insight:</strong> Dữ liệu synthetic tạo ra các <em>cụm rare dày đặc</em>. Điều này giải thích tại sao <em>Diversity-only (Novelty)</em> bị đánh lừa và cho điểm 0% — nó tưởng cụm dày là bình thường!
+                <p style="color: var(--accent-primary); margin-top: 1rem; font-size: 1.1rem; text-align: left; width: 100%;">
+                    <strong>Insight:</strong> 
+                    <br>1. <strong>Uncertainty:</strong> Có một lượng lớn frame hiếm bị model gán điểm uncertainty rất thấp (confidently wrong).
+                    <br>2. <strong>Novelty:</strong> Tách biệt tốt, nhưng dễ bị nhiễu bởi outlier.
+                    <br>3. <strong>Compound Score:</strong> Kết hợp lại tạo ra ranh giới (margin) cực kỳ rõ ràng giữa Rare và Normal, đẩy toàn bộ Rare frames lên top của bảng xếp hạng.
                 </p>
             </div>
         </div>
@@ -309,21 +315,21 @@
                     <ul style="line-height: 2; font-size: 1.2rem; color: var(--text-secondary);">
                         <li>Tại <strong>Budget 1%</strong>:
                             <ul>
-                                <li>Random: <span class="danger-text">0.7%</span></li>
-                                <li>Ambulance Chaser: <span class="success-text">24.0%</span></li>
-                                <li>👉 Uplift: <strong class="highlight">36.0×</strong></li>
+                                <li>Random: <span class="danger-text">4.0%</span></li>
+                                <li>Ambulance Chaser: <span class="success-text">100.0%</span></li>
+                                <li>👉 Uplift: <strong class="highlight">25.0×</strong></li>
                             </ul>
                         </li>
                         <li style="margin-top: 1rem;">Tại <strong>Budget 5%</strong>:
                             <ul>
-                                <li>Random: 4.0%</li>
-                                <li>Ambulance Chaser: 30.7%</li>
-                                <li>👉 Uplift: <strong class="highlight">7.7×</strong></li>
+                                <li>Random: 32.0%</li>
+                                <li>Ambulance Chaser: 100.0%</li>
+                                <li>👉 Uplift: <strong class="highlight">3.1×</strong></li>
                             </ul>
                         </li>
                     </ul>
                     <p style="margin-top: 2rem; color: var(--text-secondary); font-style: italic;">
-                        * Điểm này tính trên bản Full-system KHÔNG có temporal filter để so sánh trực tiếp sức mạnh chọn lọc.
+                        * Chỉ với 1% dữ liệu dán nhãn, thuật toán đã tóm gọn toàn bộ 100% các sự kiện hiếm, trong khi random bỏ sót gần như tất cả.
                     </p>
                 </div>
             </div>
