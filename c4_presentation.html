@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C4: Long-tail / Rare Scenario Mining</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #1a2235;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #8b5cf6;
+            --accent-tertiary: #ec4899;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --glass-bg: rgba(26, 34, 53, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* Presentation Container */
+        .presentation {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        /* Slides */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: scale(0.95) translateY(20px);
+            display: flex;
+            flex-direction: column;
+            padding: 4rem 6rem;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .slide.active {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            pointer-events: all;
+            z-index: 10;
+        }
+
+        .slide.prev {
+            transform: scale(1.05) translateY(-20px);
+        }
+
+        /* Slide Header */
+        .slide-header {
+            margin-bottom: 2rem;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 1rem;
+        }
+
+        .slide-subtitle {
+            font-size: 1.2rem;
+            color: var(--accent-primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .slide-title {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Content Area */
+        .slide-content {
+            flex: 1;
+            display: flex;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        .col {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+        }
+
+        ul li {
+            position: relative;
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        ul li::before {
+            content: '→';
+            position: absolute;
+            left: 0;
+            color: var(--accent-primary);
+            font-weight: bold;
+        }
+
+        /* Charts & Visuals */
+        .chart-container {
+            width: 100%;
+            height: 300px;
+            display: flex;
+            align-items: flex-end;
+            gap: 1rem;
+            padding: 1rem;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 0.5rem;
+            border: 1px solid var(--glass-border);
+        }
+
+        .bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            height: 100%;
+            gap: 0.5rem;
+        }
+
+        .bar {
+            width: 100%;
+            border-radius: 4px 4px 0 0;
+            background: linear-gradient(to top, var(--accent-primary), var(--accent-secondary));
+            transform-origin: bottom;
+            animation: growBar 1.5s ease-out forwards;
+        }
+
+        .bar.danger { background: linear-gradient(to top, #7f1d1d, var(--danger)); }
+        .bar.success { background: linear-gradient(to top, #064e3b, var(--success)); }
+        .bar.warning { background: linear-gradient(to top, #78350f, var(--warning)); }
+
+        @keyframes growBar {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+
+        .bar-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+        }
+        
+        .bar-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--text-primary);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 1.1rem;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        th {
+            color: var(--accent-primary);
+            font-weight: 600;
+        }
+
+        td {
+            color: var(--text-secondary);
+        }
+
+        /* Pipeline Diagram */
+        .pipeline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            gap: 1rem;
+        }
+
+        .node {
+            background: var(--glass-bg);
+            border: 1px solid var(--accent-primary);
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            flex: 1;
+            position: relative;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.2);
+        }
+
+        .node h4 { margin-bottom: 0.5rem; color: var(--accent-secondary); }
+        .node p { font-size: 0.9rem; color: var(--text-secondary); }
+
+        .arrow {
+            color: var(--text-secondary);
+            font-size: 2rem;
+            animation: pulseArrow 2s infinite;
+        }
+
+        @keyframes pulseArrow {
+            0% { transform: translateX(-5px); opacity: 0.5; }
+            50% { transform: translateX(5px); opacity: 1; }
+            100% { transform: translateX(-5px); opacity: 0.5; }
+        }
+
+        /* Navigation */
+        .controls {
+            position: fixed;
+            bottom: 2rem;
+            left: 0;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: var(--accent-primary);
+            transform: scale(1.5);
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
+
+        .counter {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            font-size: 1.2rem;
+            color: var(--text-secondary);
+            z-index: 100;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(to right, var(--accent-primary), var(--accent-tertiary));
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
+        
+        .highlight {
+            color: var(--accent-secondary);
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar" id="progress"></div>
+
+    <div class="presentation">
+        <!-- Slide 1 -->
+        <div class="slide active" id="slide-0">
+            <div class="slide-header">
+                <div class="slide-subtitle">PAIN</div>
+                <h2 class="slide-title">"99.7% of Your Data Is Boring"</h2>
+            </div>
+            <div class="slide-content">
+                <div class="col">
+                    <div class="glass-card">
+                        <h3>Vấn Đề Đuôi Dài (Long-Tail Distribution)</h3>
+                        <p style="color: var(--text-secondary); margin-top: 1rem; font-size: 1.1rem; line-height: 1.6;">
+                            Fleet thu thập lượng dữ liệu khổng lồ, nhưng <span class="highlight">94%</span> là các tình huống lái xe ban ngày bình thường, không mang lại giá trị học hỏi cho mô hình. Chỉ <span class="highlight">~0.3%</span> chứa các kịch bản thực sự hiếm gặp và giá trị.
+                        </p>
+                        <ul style="margin-top: 1.5rem;">
+                            <li>Random sampling lãng phí ngân sách vào các scene dễ, lặp lại.</li>
+                            <li>Random chỉ bắt được ~1.2 rare cases / 1000 mẫu.</li>
+                            <li>Chi phí: Gán nhãn 100K frames ($2/frame) = <span style="color: var(--danger)">$200K</span>, nhưng <span style="color: var(--danger)">$188K</span> bị lãng phí cho data trùng lặp.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="glass-card" style="height: 100%;">
+                        <h3>Phân Bổ Dữ Liệu Thực Tế</h3>
+                        <div class="chart-container" style="margin-top: 2rem;">
+                            <div class="bar-group">
+                                <div class="bar-value">94.0%</div>
+                                <div class="bar" style="height: 94%;" class="danger"></div>
+                                <div class="bar-label">Normal/Boring<br>(Lãng phí)</div>
+                            </div>
+                            <div class="bar-group">
+                                <div class="bar-value">5.7%</div>
+                                <div class="bar" style="height: 5.7%; background: linear-gradient(to top, var(--warning), #fcd34d);"></div>
+                                <div class="bar-label">Uncommon<br>(Ít gặp)</div>
+                            </div>
+                            <div class="bar-group">
+                                <div class="bar-value">0.3%</div>
+                                <div class="bar success" style="height: 15%; background: linear-gradient(to top, var(--success), #34d399);"></div>
+                                <div class="bar-label">Genuinely Rare<br>(Đắt giá)</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide" id="slide-1">
+            <div class="slide-header">
+                <div class="slide-subtitle">BASELINE</div>
+                <h2 class="slide-title">Random vs Naive Approaches</h2>
+            </div>
+            <div class="slide-content">
+                <div class="col">
+                    <div class="glass-card">
+                        <h3>Các Hướng Tiếp Cận Cơ Bản (Ngân sách 5%)</h3>
+                        <table style="margin-top: 1.5rem;">
+                            <thead>
+                                <tr>
+                                    <th>Phương Pháp</th>
+                                    <th>Rare-Case Recall</th>
+                                    <th>Coverage (Groups)</th>
+                                    <th>Redundancy Ratio</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Random Sampling</td>
+                                    <td>12.3%</td>
+                                    <td>1.2 / 6</td>
+                                    <td style="color: var(--danger);">0.73</td>
+                                </tr>
+                                <tr>
+                                    <td>Uncertainty-only</td>
+                                    <td>28.5%</td>
+                                    <td>2.5 / 6</td>
+                                    <td>0.45</td>
+                                </tr>
+                                <tr>
+                                    <td>Diversity-only</td>
+                                    <td>35.2%</td>
+                                    <td>3.8 / 6</td>
+                                    <td style="color: var(--success);">0.15</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p style="color: var(--text-secondary); margin-top: 1.5rem; font-size: 1.1rem; line-height: 1.6;">
+                            <span class="highlight">Key Insight:</span> Mỗi phương pháp đơn lẻ (Uncertainty, Diversity) chỉ bắt được một khía cạnh. Random hoàn toàn thất bại. Giao thông Việt Nam có những "compound context collisions" mà các phương pháp naive không thể nhận diện.
+                        </p>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="glass-card" style="height: 100%;">
+                        <h3>Vietnam Traffic Ontology (6 Groups)</h3>
+                        <ul style="margin-top: 1rem;">
+                            <li>Xe tang, đám ma chặn ngang giao lộ lớn.</li>
+                            <li>Xe đẩy bán hàng rong băng qua đường dẫn cao tốc.</li>
+                            <li>Động vật (bò, trâu nước) thả rông trên quốc lộ.</li>
+                            <li>Đường ngập nước sâu (chỉ thấy nóc xe).</li>
+                            <li>Xe ba gác chở hàng quá khổ, cồng kềnh.</li>
+                            <li>Rạp cưới dựng lấn chiếm làn đường.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide" id="slide-2">
+            <div class="slide-header">
+                <div class="slide-subtitle">SOLUTION</div>
+                <h2 class="slide-title">"Ambulance Chaser" Architecture</h2>
+            </div>
+            <div class="slide-content" style="flex-direction: column;">
+                <p style="color: var(--text-secondary); font-size: 1.2rem; text-align: center; max-width: 800px; margin: 0 auto;">
+                    Novelty-Weighted Coreset Selection via CLIP Embedding Density + Ensemble Uncertainty. Khám phá sự bất ngờ thông qua không gian ngữ nghĩa (semantic rarity).
+                </p>
+                <div class="glass-card" style="width: 100%; margin-top: 2rem;">
+                    <div class="pipeline">
+                        <div class="node">
+                            <h4>CLIP Encoder</h4>
+                            <p>Trích xuất vector đặc trưng ngữ nghĩa (Vision-Language)</p>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="node">
+                            <h4>k-NN Density</h4>
+                            <p>Đánh giá Mật độ thấp = Novelty/Rarity cao</p>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="node">
+                            <h4>Ensemble Classifier</h4>
+                            <p>Disagreement cao = Uncertainty/Thông tin hữu ích</p>
+                        </div>
+                        <div class="arrow">→</div>
+                        <div class="node" style="border-color: var(--accent-tertiary);">
+                            <h4>Compound Score</h4>
+                            <p>α(1/density) + β(uncertainty) + γ(temporal_div)</p>
+                        </div>
+                    </div>
+                    <div style="margin-top: 3rem; text-align: center;">
+                        <p style="font-size: 1.2rem; color: var(--text-primary);">
+                            <span class="highlight">Temporal De-duplication:</span> Lọc bỏ các frames liên tiếp trùng lặp để tối đa hóa budget 5%.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide" id="slide-3">
+            <div class="slide-header">
+                <div class="slide-subtitle">EVIDENCE</div>
+                <h2 class="slide-title">Before/After & Ablation Study</h2>
+            </div>
+            <div class="slide-content">
+                <div class="col">
+                    <div class="glass-card">
+                        <h3>Hiệu Suất (Ngân sách 5%)</h3>
+                        <table style="margin-top: 1.5rem;">
+                            <thead>
+                                <tr>
+                                    <th>Metric</th>
+                                    <th>Random</th>
+                                    <th><span class="highlight">Ours (Ambulance Chaser)</span></th>
+                                    <th>Uplift</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Rare-Case Recall</td>
+                                    <td>12.3%</td>
+                                    <td style="color: var(--success); font-weight: bold;">67.8%</td>
+                                    <td style="color: var(--accent-primary);">5.5×</td>
+                                </tr>
+                                <tr>
+                                    <td>Coverage (Groups)</td>
+                                    <td>1.2 / 6</td>
+                                    <td style="color: var(--success); font-weight: bold;">4 / 6</td>
+                                    <td style="color: var(--accent-primary);">+2.8</td>
+                                </tr>
+                                <tr>
+                                    <td>Redundancy Ratio</td>
+                                    <td>0.73</td>
+                                    <td style="color: var(--success); font-weight: bold;">0.18</td>
+                                    <td style="color: var(--accent-primary);">-75%</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="glass-card" style="height: 100%;">
+                        <h3>Ablation & Failure Analysis</h3>
+                        <ul style="margin-top: 1.5rem;">
+                            <li><span class="highlight">Density Only:</span> Recall tốt nhưng dính nhiều rác (noise).</li>
+                            <li><span class="highlight">Uncertainty Only:</span> Chỉ bắt được edge case của task hiện tại, bỏ lỡ novelty.</li>
+                            <li><span class="highlight">Downstream Gain:</span> Cải thiện mAP <strong>+12.4%</strong> trên tập test hiếm sau khi fine-tune với dữ liệu được chọn.</li>
+                            <li style="color: var(--warning);"><span style="color: var(--warning);">Failure Cases:</span> Vẫn lọt lưới các kịch bản nguy hiểm vật lý (physical danger) mà CLIP không nhận diện được qua ngữ nghĩa (vd: hố ga mất nắp, dầu nhớt đổ trên đường).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide" id="slide-4">
+            <div class="slide-header">
+                <div class="slide-subtitle">DECISION</div>
+                <h2 class="slide-title">Production Roadmap & Limitations</h2>
+            </div>
+            <div class="slide-content">
+                <div class="col">
+                    <div class="glass-card">
+                        <h3>Triển Khai Thực Tế (Deployment)</h3>
+                        <ul style="margin-top: 1.5rem;">
+                            <li><strong>Scale & Cost:</strong> Xử lý 2.4M frames trong ~4h trên một GPU A100. Trích xuất CLIP offline, tính toán k-NN và score nhẹ nhàng.</li>
+                            <li><strong>Integration:</strong> Dễ dàng tích hợp thành một filter step trước pipeline gán nhãn (Active Learning loop).</li>
+                            <li><strong>Periodic Batching:</strong> Chạy job đánh giá hàng tuần trên dữ liệu mới từ fleet.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="glass-card" style="height: 100%;">
+                        <h3>Rủi Ro & Khắc Phục</h3>
+                        <ul style="margin-top: 1.5rem;">
+                            <li><span class="highlight">Bias Risk:</span> Over-selecting edge cases có thể làm hỏng phân phối gốc. Cần lấy mẫu hỗn hợp (2% random + 3% ours) cho training.</li>
+                            <li><span class="highlight">Semantic vs Physical:</span> CLIP tốt với ngữ nghĩa bề mặt, cần Human-in-the-loop review layer để đánh giá mức độ nguy hiểm thực tế.</li>
+                            <li><span class="highlight">Future Work:</span> Đưa feedback từ labelers quay lại để tinh chỉnh trọng số (α, β, γ).</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls" id="dots">
+        <!-- Dots generated by JS -->
+    </div>
+    
+    <div class="counter"><span id="current">1</span> / 5</div>
+
+    <script>
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+        let currentSlide = 0;
+        
+        const dotsContainer = document.getElementById('dots');
+        const progressBar = document.getElementById('progress');
+        const currentCounter = document.getElementById('current');
+
+        // Create dots
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = `dot ${i === 0 ? 'active' : ''}`;
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        }
+        
+        const dots = document.querySelectorAll('.dot');
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            progressBar.style.width = `${progress}%`;
+            currentCounter.innerText = currentSlide + 1;
+        }
+
+        function goToSlide(index) {
+            if (index < 0 || index >= totalSlides || index === currentSlide) return;
+            
+            slides[currentSlide].classList.remove('active');
+            slides[currentSlide].classList.add('prev');
+            dots[currentSlide].classList.remove('active');
+            
+            // Allow animation to finish before removing prev
+            setTimeout(() => {
+                slides.forEach(s => {
+                    if (!s.classList.contains('active')) {
+                        s.classList.remove('prev');
+                    }
+                });
+            }, 800);
+            
+            currentSlide = index;
+            
+            slides[currentSlide].classList.add('active');
+            dots[currentSlide].classList.add('active');
+            
+            updateProgress();
+            
+            // Retrigger animations if needed
+            const bars = slides[currentSlide].querySelectorAll('.bar');
+            bars.forEach(bar => {
+                bar.style.animation = 'none';
+                bar.offsetHeight; /* trigger reflow */
+                bar.style.animation = null;
+            });
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space') {
+                goToSlide(currentSlide + 1);
+            } else if (e.key === 'ArrowLeft') {
+                goToSlide(currentSlide - 1);
+            }
+        });
+
+        // Initialize progress
+        updateProgress();
+    </script>
+</body>
+</html>
