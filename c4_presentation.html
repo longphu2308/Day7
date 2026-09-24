@@ -213,7 +213,7 @@
             color: var(--text-secondary);
         }
 
-        /* Pipeline Diagram */
+        /* Sơ đồ Pipeline */
         .pipeline {
             display: flex;
             align-items: center;
@@ -309,7 +309,7 @@
         <div class="slide active" id="slide-0">
             <div class="slide-header">
                 <div class="slide-subtitle">PAIN</div>
-                <h2 class="slide-title">"99.7% of Your Data Is Boring"</h2>
+                <h2 class="slide-title">"99.7% dữ liệu của bạn vô giá trị"</h2>
             </div>
             <div class="slide-content">
                 <div class="col">
@@ -354,7 +354,7 @@
         <div class="slide" id="slide-1">
             <div class="slide-header">
                 <div class="slide-subtitle">BASELINE</div>
-                <h2 class="slide-title">Random vs Naive Approaches</h2>
+                <h2 class="slide-title">Random vs Các phương pháp cơ bản</h2>
             </div>
             <div class="slide-content">
                 <div class="col">
@@ -364,9 +364,9 @@
                             <thead>
                                 <tr>
                                     <th>Phương Pháp</th>
-                                    <th>Rare-Case Recall</th>
+                                    <th>Recall (Tỉ lệ tìm thấy)</th>
                                     <th>Coverage (Groups)</th>
-                                    <th>Redundancy Ratio</th>
+                                    <th>Độ trùng lặp (Redundancy)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -377,13 +377,13 @@
                                     <td style="color: var(--danger);">0.73</td>
                                 </tr>
                                 <tr>
-                                    <td>Uncertainty-only</td>
+                                    <td>Chỉ dùng Uncertainty</td>
                                     <td>28.5%</td>
                                     <td>2.5 / 6</td>
                                     <td>0.45</td>
                                 </tr>
                                 <tr>
-                                    <td>Diversity-only</td>
+                                    <td>Chỉ dùng Diversity (Novelty)</td>
                                     <td>35.2%</td>
                                     <td>3.8 / 6</td>
                                     <td style="color: var(--success);">0.15</td>
@@ -415,7 +415,7 @@
         <div class="slide" id="slide-2">
             <div class="slide-header">
                 <div class="slide-subtitle">SOLUTION</div>
-                <h2 class="slide-title">"Ambulance Chaser" Architecture</h2>
+                <h2 class="slide-title">Kiến trúc "Ambulance Chaser"</h2>
             </div>
             <div class="slide-content" style="flex-direction: column;">
                 <p style="color: var(--text-secondary); font-size: 1.2rem; text-align: center; max-width: 800px; margin: 0 auto;">
@@ -456,7 +456,7 @@
         <div class="slide" id="slide-3">
             <div class="slide-header">
                 <div class="slide-subtitle">EVIDENCE</div>
-                <h2 class="slide-title">Before/After & Ablation Study</h2>
+                <h2 class="slide-title">Kết quả & Ablation Study (Phân tích thành phần)</h2>
             </div>
             <div class="slide-content">
                 <div class="col">
@@ -467,13 +467,13 @@
                                 <tr>
                                     <th>Metric</th>
                                     <th>Random</th>
-                                    <th><span class="highlight">Ours (Ambulance Chaser)</span></th>
+                                    <th><span class="highlight">Phương pháp của chúng tôi</span></th>
                                     <th>Uplift</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 <tr>
-                                    <td>Rare-Case Recall</td>
+                                    <td>Recall (Tỉ lệ tìm thấy)</td>
                                     <td>12.3%</td>
                                     <td style="color: var(--success); font-weight: bold;">67.8%</td>
                                     <td style="color: var(--accent-primary);">5.5×</td>
@@ -485,7 +485,7 @@
                                     <td style="color: var(--accent-primary);">+2.8</td>
                                 </tr>
                                 <tr>
-                                    <td>Redundancy Ratio</td>
+                                    <td>Độ trùng lặp (Redundancy)</td>
                                     <td>0.73</td>
                                     <td style="color: var(--success); font-weight: bold;">0.18</td>
                                     <td style="color: var(--accent-primary);">-75%</td>
@@ -512,7 +512,7 @@
         <div class="slide" id="slide-4">
             <div class="slide-header">
                 <div class="slide-subtitle">DECISION</div>
-                <h2 class="slide-title">Production Roadmap & Limitations</h2>
+                <h2 class="slide-title">Lộ trình triển khai & Hạn chế</h2>
             </div>
             <div class="slide-content">
                 <div class="col">
@@ -531,7 +531,7 @@
                         <ul style="margin-top: 1.5rem;">
                             <li><span class="highlight">Bias Risk:</span> Over-selecting edge cases có thể làm hỏng phân phối gốc. Cần lấy mẫu hỗn hợp (2% random + 3% ours) cho training.</li>
                             <li><span class="highlight">Semantic vs Physical:</span> CLIP tốt với ngữ nghĩa bề mặt, cần Human-in-the-loop review layer để đánh giá mức độ nguy hiểm thực tế.</li>
-                            <li><span class="highlight">Future Work:</span> Đưa feedback từ labelers quay lại để tinh chỉnh trọng số (α, β, γ).</li>
+                            <li><span class="highlight">Hướng phát triển:</span> Đưa feedback từ labelers quay lại để tinh chỉnh trọng số (α, β, γ).</li>
                         </ul>
                     </div>
                 </div>

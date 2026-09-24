@@ -214,7 +214,7 @@
             </div>
         </div>
 
-        <!-- Slide 2: The Results -->
+        <!-- Slide 2: Kết quả -->
         <div class="slide">
             <div class="slide-header">
                 <h2 class="slide-subtitle">02 / Kết quả tổng quan</h2>
@@ -235,19 +235,19 @@
                         <td class="success-text">0.006 (Thấp)</td>
                     </tr>
                     <tr>
-                        <td>Uncertainty-only</td>
+                        <td>Chỉ dùng Uncertainty</td>
                         <td class="warning">76.0%</td>
                         <td class="success-text">6/6</td>
                         <td class="warning">0.452 (Lãng phí 45%)</td>
                     </tr>
                     <tr>
-                        <td>Diversity-only (CLIP Novelty)</td>
+                        <td>Chỉ dùng Diversity (Novelty) (CLIP Novelty)</td>
                         <td class="success-text">100.0%</td>
                         <td class="success-text">6/6</td>
                         <td class="danger-text">0.726 (Lãng phí 72%)</td>
                     </tr>
                     <tr>
-                        <td><strong>Ours (Ambulance Chaser)</strong></td>
+                        <td><strong>Phương pháp của chúng tôi</strong></td>
                         <td class="success-text">100.0%</td>
                         <td class="success-text">6/6</td>
                         <td class="success-text">0.176 (Tối ưu)</td>
@@ -258,8 +258,8 @@
                 <div class="glass-card">
                     <h3 style="color: var(--accent-primary); margin-bottom: 1rem;">Vấn đề của các Baselines</h3>
                     <p style="line-height: 1.8; color: var(--text-secondary); font-size: 1.1rem;">
-                        <strong>Diversity-only</strong> tìm được hết các sự kiện hiếm, nhưng nó lại chọn liên tiếp 15-20 frames của <em>cùng một sự kiện</em>. Kết quả là nó lãng phí tới <strong>72% budget</strong> vào các frame trùng lặp, không còn chỗ trống cho các sự kiện khác nếu data lớn hơn.<br><br>
-                        <strong>Uncertainty-only</strong> bị lừa bởi các "unknown unknowns" (model tự tin là cảnh thường nhưng thực chất là cảnh hiếm), dẫn đến bỏ sót sự kiện (chỉ đạt 76%).
+                        <strong>Chỉ dùng Diversity (Novelty)</strong> tìm được hết các sự kiện hiếm, nhưng nó lại chọn liên tiếp 15-20 frames của <em>cùng một sự kiện</em>. Kết quả là nó lãng phí tới <strong>72% budget</strong> vào các frame trùng lặp, không còn chỗ trống cho các sự kiện khác nếu data lớn hơn.<br><br>
+                        <strong>Chỉ dùng Uncertainty</strong> bị lừa bởi các "unknown unknowns" (model tự tin là cảnh thường nhưng thực chất là cảnh hiếm), dẫn đến bỏ sót sự kiện (chỉ đạt 76%).
                     </p>
                 </div>
                 <div class="glass-card">
@@ -276,10 +276,10 @@
             </div>
         </div>
 
-        <!-- Slide 3: Visualizing the Space -->
+        <!-- Slide 3: Trực quan hóa không gian -->
         <div class="slide">
             <div class="slide-header">
-                <h2 class="slide-subtitle">03 / Score Distributions</h2>
+                <h2 class="slide-subtitle">03 / Phân bố điểm số (Score)</h2>
                 <h1 class="slide-title">Tại sao cần Compound Score?</h1>
             </div>
             <div class="glass-card" style="display: flex; flex-direction: column; align-items: center; height: 100%;">
@@ -287,7 +287,7 @@
                     Sự phân bố điểm số giữa frames Bình thường (Xám) và Hiếm (Xanh lá).
                 </p>
                 <div class="image-container" style="flex: 1; width: 100%; background: var(--bg-primary);">
-                    <img src="./demo/outputs/06_distributions.png" alt="Score Distributions" style="filter: brightness(1.1);">
+                    <img src="./demo/outputs/06_distributions.png" alt="Phân bố điểm số (Score)" style="filter: brightness(1.1);">
                 </div>
                 <p style="color: var(--accent-primary); margin-top: 1rem; font-size: 1.1rem; text-align: left; width: 100%;">
                     <strong>Insight:</strong> 
@@ -298,7 +298,7 @@
             </div>
         </div>
 
-        <!-- Slide 4: Budget Impact -->
+        <!-- Slide 4: Đánh giá theo Budget -->
         <div class="slide">
             <div class="slide-header">
                 <h2 class="slide-subtitle">04 / Hiệu quả đầu tư</h2>
